@@ -15,8 +15,6 @@ extern crate num;
 extern crate num_bigint;
 extern crate num_traits;
 
-extern crate rand6;
-
 // use blake2::{Blake2b, Digest};
 
 #[cfg(feature = "default")]
@@ -27,7 +25,7 @@ use blake_hash::Digest;
 #[cfg(feature = "aarch64")]
 extern crate blake; // compatible version with Blake used at circomlib
 
-use std::cmp::min;
+use std::{cmp::min, convert::TryInto};
 
 use num_bigint::{BigInt, RandBigInt, Sign, ToBigInt};
 use num_traits::One;
@@ -169,7 +167,7 @@ impl Point {
         let mut exp: PointProjective = self.projective();
         let (_, b) = n.to_bytes_le();
         for i in 0..n.bits() {
-            if test_bit(&b, i) {
+            if test_bit(&b, i.try_into().unwrap()) {
                 r = r.add(&exp);
             }
             exp = exp.add(&exp);
@@ -356,7 +354,7 @@ impl PrivateKey {
     #[allow(clippy::many_single_char_names)]
     pub fn sign_schnorr(&self, m: BigInt) -> Result<(Point, BigInt), String> {
         // random r
-        let mut rng = rand6::thread_rng();
+        let mut rng = rand::thread_rng();
         let k = rng.gen_biguint(1024).to_bigint().unwrap();
 
         // r = k·G
@@ -398,7 +396,7 @@ pub fn verify_schnorr(pk: Point, m: BigInt, r: Point, s: BigInt) -> Result<bool,
 
 pub fn new_key() -> PrivateKey {
     // https://tools.ietf.org/html/rfc8032#section-5.1.5
-    let mut rng = rand6::thread_rng();
+    let mut rng = rand::thread_rng();
     let sk_raw = rng.gen_biguint(1024).to_bigint().unwrap();
     let (_, sk_raw_bytes) = sk_raw.to_bytes_be();
     PrivateKey::import(sk_raw_bytes[..32].to_vec()).unwrap()
@@ -427,7 +425,7 @@ pub fn verify(pk: Point, sig: Signature, msg: BigInt) -> bool {
 mod tests {
     use super::*;
     extern crate rustc_hex;
-    use rand6::Rng;
+    use rand::Rng;
     use rustc_hex::{FromHex, ToHex};
 
     #[test]
@@ -647,7 +645,7 @@ mod tests {
     #[test]
     fn test_point_decompress_loop() {
         for _ in 0..5 {
-            let random_bytes = rand6::thread_rng().gen::<[u8; 32]>();
+            let random_bytes = rand::thread_rng().gen::<[u8; 32]>();
             let sk_raw: BigInt = BigInt::from_bytes_le(Sign::Plus, &random_bytes[..]);
             let (_, sk_raw_bytes) = sk_raw.to_bytes_be();
             let mut h: Vec<u8> = blh(&sk_raw_bytes);

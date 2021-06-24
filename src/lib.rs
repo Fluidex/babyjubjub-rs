@@ -250,8 +250,8 @@ fn blh(b: &Vec<u8>) -> Vec<u8> {
 
 #[derive(Debug, Clone)]
 pub struct Signature {
-    r_b8: Point,
-    s: BigInt,
+    pub r_b8: Point,
+    pub s: BigInt,
 }
 
 impl Signature {

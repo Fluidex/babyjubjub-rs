@@ -9,7 +9,7 @@ repository = "https://github.com/arnaucube/babyjubjub-rs"
 readme = "README.md"
 
 [dependencies]
-ff = {package="ff_ce" , version="0.13", features = ["derive"]}
+ff = { git = "https://github.com/Fluidex/ff.git", package="ff_ce" , features = ["derive"] }
 rand = "0.8"
 num = "0.4.0"
 num-bigint = {version = "0.4.0", features = ["rand"]}
@@ -36,4 +36,3 @@ aarch64 = ["blake"]
 
 [patch.crates-io]
 poseidon-rs = { git = "https://github.com/Fluidex/poseidon-rs.git" }
-ff = { package = "ff_ce", git = "https://github.com/Fluidex/ff.git", branch = "serde" }

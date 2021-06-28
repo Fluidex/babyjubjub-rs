@@ -201,15 +201,7 @@ pub fn test_bit(b: &[u8], i: usize) -> bool {
     b[i / 8] & (1 << (i % 8)) != 0
 }
 
-pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
-    // https://tools.ietf.org/html/rfc8032#section-5.2.3
-    let mut sign: bool = false;
-    let mut b = bb;
-    if b[31] & 0x80 != 0x00 {
-        sign = true;
-        b[31] &= 0x7F;
-    }
-    let y: BigInt = BigInt::from_bytes_le(Sign::Plus, &b[..]);
+pub fn recover_point(y: BigInt, sign: bool) -> Result<Point, String> {
     if y >= Q.clone() {
         return Err("y outside the Finite Field over R".to_string());
     }
@@ -233,6 +225,18 @@ pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
     let x_fr: Fr = Fr::from_str(&x.to_string()).unwrap();
     let y_fr: Fr = Fr::from_str(&y.to_string()).unwrap();
     Ok(Point { x: x_fr, y: y_fr })
+}
+
+pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
+    // https://tools.ietf.org/html/rfc8032#section-5.2.3
+    let mut sign: bool = false;
+    let mut b = bb;
+    if b[31] & 0x80 != 0x00 {
+        sign = true;
+        b[31] &= 0x7F;
+    }
+    let y: BigInt = BigInt::from_bytes_le(Sign::Plus, &b[..]);
+    recover_point(y, sign)
 }
 
 #[cfg(feature = "default")]

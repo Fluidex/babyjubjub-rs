@@ -14,16 +14,7 @@ extern crate generic_array;
 extern crate num;
 extern crate num_bigint;
 extern crate num_traits;
-
-// use blake2::{Blake2b, Digest};
-
-#[cfg(feature = "default")]
-extern crate blake_hash; // compatible version with Blake used at circomlib
-#[cfg(feature = "default")]
-use blake_hash::Digest;
-
-#[cfg(feature = "aarch64")]
-extern crate blake; // compatible version with Blake used at circomlib
+extern crate blake;
 
 use std::{cmp::min, convert::TryInto};
 
@@ -239,13 +230,6 @@ pub fn decompress_point(bb: [u8; 32]) -> Result<Point, String> {
     recover_point(y, sign)
 }
 
-#[cfg(feature = "default")]
-fn blh(b: &[u8]) -> Vec<u8> {
-    let hash = blake_hash::Blake512::digest(&b);
-    hash.to_vec()
-}
-
-#[cfg(feature = "aarch64")]
 fn blh(b: &Vec<u8>) -> Vec<u8> {
     let mut hash = [0; 64];
     blake::hash(512, b, &mut hash).unwrap();
